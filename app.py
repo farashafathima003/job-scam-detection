@@ -457,7 +457,7 @@ if st.button("🔍 Check Job Advertisement"):
 
             st.error(
                 "Dataset not found. Check that "
-                "'dataset/fake_job_postings.csv' exists "
+                "'Dataset/fake_job_postings.csv' exists "
                 "in your project folder."
             )
 
