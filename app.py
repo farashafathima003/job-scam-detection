@@ -88,7 +88,7 @@ st.markdown("""
 @st.cache_resource
 def load_models():
 
-    df = pd.read_csv("dataset/fake_job_postings.csv")
+    df = pd.read_csv("Dataset/fake_job_postings.csv")
 
     df["text"] = (
         df["title"].fillna("") + " " +
