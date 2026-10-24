@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Job Scam Detector</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        .header p {
+            color: #64748b;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #334155;
+        }
+
+        textarea {
+            width: 100%;
+            height: 190px;
+            padding: 15px;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #2563eb;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        #result {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .result-title {
+            margin-top: 0;
+            color: #1e293b;
+        }
+
+        .risk {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .high {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .low {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .info-box {
+            background: white;
+            padding: 15px;
+            margin-top: 12px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-box h3 {
+            margin-top: 0;
+            color: #334155;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .similar-job {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .similar-job strong {
+            color: #1e293b;
+        }
+
+        .similarity {
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #b91c1c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🔍 Job Scam Detector</h1>
+
+        <p>
+            Analyze a job advertisement and identify
+            potential scam indicators.
+        </p>
+    </div>
+
+
+    <label for="jobText">
+        Paste the Job Advertisement
+    </label>
+
+    <textarea
+        id="jobText"
+        placeholder="Paste the complete job advertisement here..."
+    ></textarea>
+
+
+    <button onclick="checkJob()">
+        🔎 Check Job
+    </button>
+
+
+    <div id="result">
+
+        <h2 class="result-title">
+            Detection Result
+        </h2>
+
+
+        <div id="riskBox" class="risk"></div>
+
+
+        <div class="info-box">
+
+            <h3>📊 Fraud Probability</h3>
+
+            <p id="probability"></p>
+
+        </div>
+
+
+        <div class="info-box">
+
+            <h3>⚠️ Scam Indicators</h3>
+
+            <ul id="indicators"></ul>
+
+        </div>
+
+
+        <div class="info-box">
+
+            <h3>💡 Explanation</h3>
+
+            <p id="explanation"></p>
+
+        </div>
+
+
+        <div class="info-box">
+
+            <h3>🔎 Similar Fraudulent Jobs</h3>
+
+            <div id="similarJobs"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+async function checkJob() {
+
+    const jobText =
+        document.getElementById("jobText")
+        .value
+        .trim();
+
+
+    if (!jobText) {
+
+        alert(
+            "Please paste a job advertisement first."
+        );
+
+        return;
+    }
+
+
+    const resultBox =
+        document.getElementById("result");
+
+    const riskBox =
+        document.getElementById("riskBox");
+
+    const probability =
+        document.getElementById("probability");
+
+    const indicators =
+        document.getElementById("indicators");
+
+    const explanation =
+        document.getElementById("explanation");
+
+    const similarJobs =
+        document.getElementById("similarJobs");
+
+
+    resultBox.style.display = "block";
+
+
+    riskBox.className = "risk";
+
+    riskBox.innerText =
+        "Checking...";
+
+
+    probability.innerText = "";
+
+    indicators.innerHTML = "";
+
+    explanation.innerText =
+        "Analyzing the advertisement...";
+
+    similarJobs.innerHTML =
+        "Finding similar fraudulent jobs...";
+
+
+    try {
+
+        const response = await fetch(
+            "http://127.0.0.1:8000/predict",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    job_text: jobText
+                })
+            }
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Server error"
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        // -----------------------------
+        // RISK LEVEL
+        // -----------------------------
+
+        riskBox.innerText =
+            "Risk Level: " +
+            data.risk_level;
+
+
+        if (
+            data.risk_level ===
+            "High Risk"
+        ) {
+
+            riskBox.classList.add(
+                "high"
+            );
+
+        }
+
+        else if (
+            data.risk_level ===
+            "Medium Risk"
+        ) {
+
+            riskBox.classList.add(
+                "medium"
+            );
+
+        }
+
+        else {
+
+            riskBox.classList.add(
+                "low"
+            );
+        }
+
+
+        // -----------------------------
+        // FRAUD PROBABILITY
+        // -----------------------------
+
+        probability.innerText =
+            data.fraud_probability +
+            "%";
+
+
+        // -----------------------------
+        // SCAM INDICATORS
+        // -----------------------------
+
+        indicators.innerHTML = "";
+
+
+        if (
+            data.scam_indicators &&
+            data.scam_indicators.length > 0
+        ) {
+
+            data.scam_indicators.forEach(
+                function(indicator) {
+
+                    const li =
+                        document.createElement(
+                            "li"
+                        );
+
+                    li.innerText =
+                        indicator;
+
+                    indicators.appendChild(
+                        li
+                    );
+                }
+            );
+
+        }
+
+        else {
+
+            const li =
+                document.createElement(
+                    "li"
+                );
+
+            li.innerText =
+                "No major scam indicators detected.";
+
+            indicators.appendChild(
+                li
+            );
+        }
+
+
+        // -----------------------------
+        // EXPLANATION
+        // -----------------------------
+
+        explanation.innerText =
+            data.explanation;
+
+
+        // -----------------------------
+        // SIMILAR FRAUDULENT JOBS
+        // -----------------------------
+
+        similarJobs.innerHTML = "";
+
+
+        if (
+            data.similar_fraudulent_jobs &&
+            data.similar_fraudulent_jobs.length > 0
+        ) {
+
+            data.similar_fraudulent_jobs
+                .forEach(
+                    function(job, index) {
+
+                        const div =
+                            document.createElement(
+                                "div"
+                            );
+
+                        div.className =
+                            "similar-job";
+
+
+                        div.innerHTML = `
+                            <strong>
+                                ${index + 1}.
+                                ${job.title}
+                            </strong>
+
+                            <br>
+
+                            Location:
+                            ${job.location}
+
+                            <br>
+
+                            Similarity:
+                            <span class="similarity">
+                                ${job.similarity}
+                            </span>
+                        `;
+
+
+                        similarJobs.appendChild(
+                            div
+                        );
+                    }
+                );
+
+        }
+
+        else {
+
+            similarJobs.innerText =
+                "No similar fraudulent jobs found.";
+        }
+
+    }
+
+    catch (error) {
+
+        riskBox.className =
+            "risk high";
+
+        riskBox.innerText =
+            "Unable to connect to the server";
+
+
+        probability.innerText = "";
+
+
+        indicators.innerHTML = "";
+
+
+        explanation.innerText =
+            "Please make sure the FastAPI server is running at http://127.0.0.1:8000";
+
+
+        similarJobs.innerHTML = "";
+    }
+
+}
+
+</script>
+
+</body>
+</html>
